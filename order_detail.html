@@ -1,0 +1,102 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Order {{ order.order_number }} - Workload Management{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Order {{ order.order_number }}</h1>
+    <a href="{% url 'order_list' %}" class="btn btn-secondary">Back to Orders</a>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Order Details</h3>
+            </div>
+            <div class="card-body">
+                <p><strong>Order Number:</strong> {{ order.order_number }}</p>
+                <p><strong>Status:</strong> 
+                    {% if order.order_status == 'placed' %}
+                        <span class="badge bg-primary">{{ order.get_order_status_display }}</span>
+                    {% elif order.order_status == 'wip' %}
+                        <span class="badge bg-warning text-dark">{{ order.get_order_status_display }}</span>
+                    {% else %}
+                        <span class="badge bg-success">{{ order.get_order_status_display }}</span>
+                    {% endif %}
+                </p>
+                <p><strong>Created:</strong> {{ order.created_at|date:"M d, Y H:i" }}</p>
+                <p><strong>Channel:</strong> {{ order.get_channel_display }}</p>
+                {% if order.order_description %}
+                    <p><strong>Description:</strong> {{ order.order_description }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3>Order Items</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Toppings</th>
+                                <th>Status</th>
+                                <th>Assigned To</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                                <tr>
+                                    <td>{{ item.product.description }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>${{ item.price }}</td>
+                                    <td>
+                                        {% if item.topping1 or item.topping2 or item.topping3 %}
+                                            <ul class="list-unstyled mb-0">
+                                                {% if item.topping1 %}<li>{{ item.topping1 }}</li>{% endif %}
+                                                {% if item.topping2 %}<li>{{ item.topping2 }}</li>{% endif %}
+                                                {% if item.topping3 %}<li>{{ item.topping3 }}</li>{% endif %}
+                                            </ul>
+                                        {% else %}
+                                            <em>No toppings</em>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if item.item_status == 'placed' %}
+                                            <span class="badge bg-primary">Placed</span>
+                                        {% elif item.item_status == 'wip' %}
+                                            <span class="badge bg-warning text-dark">In Progress</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Complete</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if item.assigned_group %}
+                                            <strong>Group:</strong> {{ item.assigned_group.name }}<br>
+                                            {% if item.assigned_staff %}
+                                                <strong>Staff:</strong> {{ item.assigned_staff.user.username }}
+                                            {% else %}
+                                                <span class="text-muted">Waiting for staff</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-danger">Not assigned</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
